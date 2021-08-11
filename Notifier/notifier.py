@@ -34,7 +34,7 @@ class MyApp(QWidget):
 
         # 시간을 표시할 라벨 생성
         self.label = QLabel(self)
-        self.label.setGeometry(10, 10, 200, 20)
+        self.label.setGeometry(10, 10, 250, 20)
         self.label.move(40, 30)
 
         self.setWindowTitle("Notifier")
