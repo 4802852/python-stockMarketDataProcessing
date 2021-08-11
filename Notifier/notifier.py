@@ -17,7 +17,7 @@ class MyApp(QWidget):
 
         # timer
         self.t1 = self.now.replace(hour=20, minute=0, second=0, microsecond=0)
-        # self.t_9 = self.t_now.replace(hour=9, minute=0, second=0, microsecond=0)
+        self.t_test = self.t_now.replace(hour=3, minute=5, second=0, microsecond=0)
         # self.t_start = self.t_now.replace(hour=9, minute=5, second=0, microsecond=0)
         # self.t_sell = self.t_now.replace(hour=15, minute=15, second=0, microsecond=0)
 
@@ -52,6 +52,8 @@ class MyApp(QWidget):
         else:
             if self.t1 <= self.now < self.t1.replace(second=1):
                 to_slack("미국장 프리오픈, LOC 매수 진행")
+            elif self.t_test <= self.now < self.t_test.replace(second=10):
+                print("t test")
 
 
 if __name__ == "__main__":
