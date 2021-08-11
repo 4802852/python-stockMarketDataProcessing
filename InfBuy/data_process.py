@@ -1,7 +1,7 @@
 import pandas as pd
 import datetime
 from RSIget import *
-from slack.slack import *
+from ..slack.slack import *
 
 
 def data_open_rsi(filename):

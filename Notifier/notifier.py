@@ -4,7 +4,7 @@ from PyQt5.QAxContainer import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import datetime
-from slack.slack import *
+from ..slack.slack import *
 
 
 class MyApp(QWidget):
