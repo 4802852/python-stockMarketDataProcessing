@@ -4,7 +4,14 @@ from PyQt5.QAxContainer import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import datetime
-from ..slack.slack import *
+from os import path
+
+if __package__ is None:
+    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+    from slack.slack import *
+else:
+    from ..slack.slack import *
+# from slack.slack import *
 
 
 class MyApp(QWidget):
@@ -17,7 +24,7 @@ class MyApp(QWidget):
 
         # timer
         self.t1 = self.now.replace(hour=20, minute=0, second=0, microsecond=0)
-        self.t_test = self.t_now.replace(hour=3, minute=5, second=0, microsecond=0)
+        # self.t_test = self.now.replace(hour=3, minute=15, second=0, microsecond=0)
         # self.t_start = self.t_now.replace(hour=9, minute=5, second=0, microsecond=0)
         # self.t_sell = self.t_now.replace(hour=15, minute=15, second=0, microsecond=0)
 
@@ -52,8 +59,6 @@ class MyApp(QWidget):
         else:
             if self.t1 <= self.now < self.t1.replace(second=1):
                 to_slack("미국장 프리오픈, LOC 매수 진행")
-            elif self.t_test <= self.now < self.t_test.replace(second=10):
-                print("t test")
 
 
 if __name__ == "__main__":
