@@ -52,6 +52,7 @@ class MyApp(QWidget):
     def timeout_run(self):
         self.now = datetime.datetime.now()
         self.now_date = datetime.datetime.today().weekday()
+        self.t1 = self.now.replace(hour=20, minute=0, second=0, microsecond=0)
         text = self.now.strftime("%Y-%m-%d %H:%M:%S")
         self.label.setText(str(text))
         if self.now_date == (5 or 6):
