@@ -5,8 +5,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import datetime
 from os import path
-import requests
-from bs4 import BeautifulSoup as soup
+from get_info import *
 
 if __package__ is None:
     sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
@@ -62,29 +61,21 @@ class MyApp(QWidget):
         else:
             if self.t1 <= self.now < self.t1.replace(second=1):
                 to_slack("미국장 프리오픈, LOC 매수 진행")
-                to_slack(self.exchange(), "#exchange-rate")
+                to_slack(self.get_inform(), "#exchange-rate")
 
-    def exchange(self):
-        url = "https://finance.naver.com/marketindex/"
-        res = requests.get(url)
-        html = soup(res.text, "html.parser")
-
-        nation = html.select("a.head > h3.h_lst")
-        value = html.select("div.head_info > span.value")
-        change = html.select("div.head_info > span.change")
-        updown = html.select("div.head_info > span.blind")
-
-        for i in range(len(nation)):
-            if nation[i].string in ["미국 USD", "달러인덱스"]:
-                if updown[i].string == "상승":
-                    mark = "↑"
-                elif updown[i].string == "하락":
-                    mark = "↓"
-                else:
-                    mark = "-"
-                mesg = [nation[i].string, value[i].string, "/", change[i].string, mark]
-                mesg = " ".join(mesg)
-                to_slack(mesg, "#exchange-rate")
+    def get_inform(self):
+        msg = (
+            get_exchange_rate()
+            + "\n"
+            + get_dollar_index()
+            + "\n"
+            + get_interest()
+            + "\n"
+            + get_copper()
+            + "\n"
+            + get_wti_oil()
+        )
+        return msg
 
 
 if __name__ == "__main__":
