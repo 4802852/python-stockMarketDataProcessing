@@ -62,7 +62,7 @@ class MyApp(QWidget):
         else:
             if self.t1 <= self.now < self.t1.replace(second=1):
                 to_slack("미국장 프리오픈, LOC 매수 진행")
-                to_slack(self.exchange())
+                to_slack(self.exchange(), "#exchange-rate")
 
     def exchange(self):
         url = "https://finance.naver.com/marketindex/"
