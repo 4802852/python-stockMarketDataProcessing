@@ -6,8 +6,19 @@ url = "https://finance.naver.com/marketindex/"
 res = requests.get(url)
 html = soup(res.text, "html.parser")
 
-nation = html.select_one("a.head > h3.h_lst").string
-value = html.select_one("span.value").string
+nation = html.select("a.head > h3.h_lst")
+value = html.select("div.head_info > span.value")
+change = html.select("div.head_info > span.change")
+updown = html.select("div.head_info > span.blind")
 
-today = nation + " " + value
-to_slack(today, "#exchange-rate")
+for i in range(len(nation)):
+    if nation[i].string in ["미국 USD", "달러인덱스"]:
+        if updown[i].string == "상승":
+            mark = "↑"
+        elif updown[i].string == "하락":
+            mark = "↓"
+        else:
+            mark = "-"
+        mesg = [nation[i].string, value[i].string, "/", change[i].string, mark]
+        mesg = " ".join(mesg)
+        to_slack(mesg, "#exchange-rate")
