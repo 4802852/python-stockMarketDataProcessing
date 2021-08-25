@@ -5,6 +5,8 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import datetime
 from os import path
+import requests
+from bs4 import BeautifulSoup as soup
 
 if __package__ is None:
     sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
@@ -60,6 +62,16 @@ class MyApp(QWidget):
         else:
             if self.t1 <= self.now < self.t1.replace(second=1):
                 to_slack("미국장 프리오픈, LOC 매수 진행")
+                to_slack(self.exchange())
+
+    def exchange(self):
+        url = "https://finance.naver.com/marketindex/"
+        res = requests.get(url)
+        html = soup(res.text, "html.parser")
+
+        nation = html.select_one("a.head > h3.h_lst").string
+        value = html.select_one("span.value").string
+        return nation + " " + value
 
 
 if __name__ == "__main__":
