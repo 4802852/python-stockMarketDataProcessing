@@ -1,7 +1,14 @@
 import pandas as pd
 import datetime
 from RSIget import *
-from ..slack.slack import *
+import sys
+from os import path
+
+if __package__ is None:
+    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+    from slack.slack import *
+else:
+    from ..slack.slack import *
 
 
 def data_open_rsi(filename):
@@ -24,10 +31,11 @@ def data_open_rsi(filename):
     go_list = to_go.values.tolist()
     for line in go_list:
         info1 = f"{line[0]} 종목 RSI {line[4]} 기준 RSI {line[3]} 매수 가능"
-        info2 = f"현재가 ${line[2]} 40분할 * 2주 최소 투자금액 ${float(line[2]) * 40 * 2} 약 {int(float(line[2]) * 40 * 2 * 1100)}원"
+        info2 = f"현재가 ${line[2]} 40분할 * 2주 최소 투자금액 ${float(line[2]) * 40 * 2} 약 {int(float(line[2]) * 40 * 2 * 1200)}원"
         to_slack(info1)
         to_slack(info2)
 
 
-path = os.path.dirname(os.path.abspath(__file__))
-data_open_rsi("symbol_list.csv")
+if __name__ == "__main__":
+    path = os.path.dirname(os.path.abspath(__file__))
+    data_open_rsi("symbol_list.csv")
