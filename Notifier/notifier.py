@@ -56,11 +56,10 @@ class MyApp(QWidget):
         self.t1 = self.now.replace(hour=20, minute=0, second=0, microsecond=0)
         text = self.now.strftime("%Y-%m-%d %H:%M:%S")
         self.label.setText(str(text))
-        if self.now_date == (5 or 6):
+        if self.now_date == 5 or self.now_date == 6:
             pass
         else:
             if self.t1 <= self.now < self.t1.replace(second=1):
-                to_slack("미국장 프리오픈, LOC 매수 진행")
                 to_slack(self.get_inform(), "#exchange-rate")
 
     def get_inform(self):

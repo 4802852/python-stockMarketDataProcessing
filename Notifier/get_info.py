@@ -1,13 +1,13 @@
 import requests
 from bs4 import BeautifulSoup as soup
-import sys
-from os import path
+# import sys
+# from os import path
 
-if __package__ is None:
-    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
-    from slack.slack import *
-else:
-    from ..slack.slack import *
+# if __package__ is None:
+#     sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+#     from slack.slack import *
+# else:
+#     from ..slack.slack import *
 
 
 def get_exchange_rate():
@@ -192,5 +192,4 @@ if __name__ == "__main__":
         + "\n"
         + get_wti_oil()
     )
-    # to_slack(msg, "#exchange-rate")
     print(msg)
