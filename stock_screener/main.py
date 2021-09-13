@@ -1,3 +1,4 @@
+from numpy import NaN, nan
 import pandas as pd
 import requests
 import re
@@ -82,12 +83,13 @@ def checker(df):
             df.loc[i, "영업이익 Check"] = earning_positive
             df.loc[i, "영업이익 증가 Check"] = earning_grow
             # ROE checker
-            roe = 0
+            roe = []
             for j in range(5):
                 roe_tmp = tmp_data.loc["ROE(%)", columns[j]]
-                roe += roe_tmp
+                if roe_tmp == roe_tmp:
+                    roe.append(roe_tmp)
                 df.loc[i, f"{columns[j]} ROE"] = roe_tmp
-            roe_average = round(roe / 5, 2)
+            roe_average = round(sum(roe) / len(roe), 2)
             if roe_average >= 10:
                 df.loc[i, "ROE 평균 check"] = True
             else:
