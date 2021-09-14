@@ -1,4 +1,3 @@
-from numpy import NaN, nan
 import pandas as pd
 import requests
 import re
