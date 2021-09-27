@@ -35,13 +35,12 @@ def get_data(ticker):
         column_name.append(column_name_old[i][1].strip())
     data.columns = column_name
     data.set_index("주요재무정보", inplace=True)
-    data = data.loc[["매출액", "영업이익", "ROE(%)", "현금배당수익률"]]
+    data = data.loc[["매출액", "영업이익", "ROE(%)", "현금DPS(원)", "현금배당수익률"]]
     column_name_old = data.columns
     column_name = []
     for i in range(len(column_name_old)):
         column_name.append(column_name_old[i].split("/")[0])
     data.columns = column_name
-
     return data
 
 
@@ -60,13 +59,22 @@ def checker(df):
             # 매출액 증가 checker
             revenue_grow = True
             revenue_old = 0
+            revenue_averager = []
             for j in range(5):
                 revenue = tmp_data.loc["매출액", columns[j]]
+                revenue_averager.append(revenue)
                 df.loc[i, f"{columns[j]} 매출"] = revenue
                 if revenue < revenue_old:
                     revenue_grow = False
                 revenue_old = revenue
-            df.loc[i, "매출 증가 Check"] = revenue_grow
+            if revenue_grow:
+                df.loc[i, "매출 증가 Check"] = revenue_grow
+            else:
+                average = sum(revenue_averager) / len(revenue_averager)
+                if average <= revenue:
+                    df.loc[i, "매출 증가 Check"] = "CHECK"
+                else:
+                    df.loc[i, "매출 증가 Check"] = False
             # 흑자 기업 checker
             earning_grow = True
             earning_positive = True
@@ -93,6 +101,16 @@ def checker(df):
                 df.loc[i, "ROE 평균 check"] = True
             else:
                 df.loc[i, "ROE 평균 check"] = False
+            # 현금 배당률 증가 checker
+            dividend_grow = True
+            dividend_old = 0
+            for j in range(5):
+                dividend = tmp_data.loc["현금DPS(원)", columns[j]]
+                df.loc[i, f"{columns[j]} 배당금"] = dividend
+                if dividend < dividend_old:
+                    dividend_grow = False
+                dividend_old = dividend
+            df.loc[i, "배당금증가 Check"] = dividend_grow
             # 배당수익률 checker
             df.loc[i, "현금배당수익률"] = tmp_data.loc["현금배당수익률", columns[4]]
             if df.loc[i, "현금배당수익률"] >= 2:
