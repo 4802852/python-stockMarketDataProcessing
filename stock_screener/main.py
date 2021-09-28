@@ -63,7 +63,7 @@ def checker(df):
             for j in range(5):
                 revenue = tmp_data.loc["매출액", columns[j]]
                 revenue_averager.append(revenue)
-                df.loc[i, f"{columns[j]} 매출"] = revenue
+                df.loc[i, f"매출 {j}"] = revenue
                 if revenue < revenue_old:
                     revenue_grow = False
                 revenue_old = revenue
@@ -79,23 +79,32 @@ def checker(df):
             earning_grow = True
             earning_positive = True
             earning_old = 0
+            earning_averager = []
             for j in range(5):
                 earning = tmp_data.loc["영업이익", columns[j]]
-                df.loc[i, f"{columns[j]} 영업이익"] = earning
+                earning_averager.append(earning)
+                df.loc[i, f"영업이익 {j}"] = earning
                 if earning <= 0:
                     earning_positive = False
                 if earning < earning_old:
                     earning_grow = False
                 earning_old = earning
             df.loc[i, "영업이익 Check"] = earning_positive
-            df.loc[i, "영업이익 증가 Check"] = earning_grow
+            if earning_grow:
+                df.loc[i, "영업이익 증가 Check"] = earning_grow
+            else:
+                average = sum(earning_averager) / len(earning_averager)
+                if average <= earning:
+                    df.loc[i, "영업이익 증가 Check"] = "CHECK"
+                else:
+                    df.loc[i, "영업이익 증가 Check"] = earning_grow
             # ROE checker
             roe = []
             for j in range(5):
                 roe_tmp = tmp_data.loc["ROE(%)", columns[j]]
                 if roe_tmp == roe_tmp:
                     roe.append(roe_tmp)
-                df.loc[i, f"{columns[j]} ROE"] = roe_tmp
+                df.loc[i, f"ROE {j}"] = roe_tmp
             roe_average = round(sum(roe) / len(roe), 2)
             if roe_average >= 10:
                 df.loc[i, "ROE 평균 check"] = True
@@ -106,10 +115,12 @@ def checker(df):
             dividend_old = 0
             for j in range(5):
                 dividend = tmp_data.loc["현금DPS(원)", columns[j]]
-                df.loc[i, f"{columns[j]} 배당금"] = dividend
+                df.loc[i, f"배당금 {j}"] = dividend
                 if dividend < dividend_old:
                     dividend_grow = False
                 dividend_old = dividend
+            if dividend == 0:
+                dividend_grow = False
             df.loc[i, "배당금증가 Check"] = dividend_grow
             # 배당수익률 checker
             df.loc[i, "현금배당수익률"] = tmp_data.loc["현금배당수익률", columns[4]]
@@ -119,7 +130,7 @@ def checker(df):
                 df.loc[i, "배당 checker"] = False
         except Exception:
             err = traceback.format_exc()
-            df.loc[i, "error code"] = str(err)
+            df.loc[i, "error code"] = "ERROR"
         # random sleeper
         rand_value = random() * 2 + 1
         time.sleep(rand_value)
