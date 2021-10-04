@@ -116,15 +116,15 @@ def checker(df):
             for j in range(5):
                 dividend = tmp_data.loc["현금DPS(원)", columns[j]]
                 df.loc[i, f"배당금 {j}"] = dividend
+                if dividend == 0:
+                    dividend_grow = False
                 if dividend < dividend_old:
                     dividend_grow = False
                 dividend_old = dividend
-            if dividend == 0:
-                dividend_grow = False
             df.loc[i, "배당금증가 Check"] = dividend_grow
             # 배당수익률 checker
             df.loc[i, "현금배당수익률"] = tmp_data.loc["현금배당수익률", columns[4]]
-            if df.loc[i, "현금배당수익률"] >= 2:
+            if df.loc[i, "현금배당수익률"] >= 1:
                 df.loc[i, "배당 checker"] = True
             else:
                 df.loc[i, "배당 checker"] = False
