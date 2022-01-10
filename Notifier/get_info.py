@@ -1,13 +1,8 @@
 import requests
+import os
 from bs4 import BeautifulSoup as soup
-# import sys
-# from os import path
 
-# if __package__ is None:
-#     sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
-#     from slack.slack import *
-# else:
-#     from ..slack.slack import *
+c_path = os.path.dirname(os.path.abspath(__file__))
 
 
 def get_exchange_rate():
@@ -17,26 +12,13 @@ def get_exchange_rate():
 
     nation = html.select("a.head > h3.h_lst")
     value = html.select("div.head_info > span.value")
-    change = html.select("div.head_info > span.change")
-    updown = html.select("div.head_info > span.blind")
 
     for i in range(len(nation)):
         na = nation[i].string
         va = value[i].string.replace(",", "")
-        ch = change[i].string.replace(",", "")
-        ud = updown[i].string
         if na == "미국 USD":
-            if ud == "상승":
-                mark = "↑"
-            elif ud == "하락":
-                mark = "↓"
-            else:
-                mark = "-"
-            change_rate = round(float(ch) / (float(va) - float(ch)) * 100, 2)
-            mesg = [na, "\n     ", va, "/", ch, mark, "(", str(change_rate), "% )"]
-            mesg = " ".join(mesg)
-    return mesg
-    # to_slack(mesg, "#exchange-rate")
+            res = [na, float(va)]
+    return res
 
 
 def get_dollar_index():
@@ -48,29 +30,7 @@ def get_dollar_index():
     }
     data = requests.get(url, headers=headers).json()
     last_value = float(data["attr"]["last_value"])
-    last_close_value = float(data["attr"]["last_close_value"])
-    change = round(last_value - last_close_value, 3)
-    change_rate = round(change / last_close_value * 100, 2)
-    if change > 0:
-        mark = "↑"
-    elif change < 0:
-        mark = "↓"
-        change = -change
-    else:
-        mark = "-"
-    mesg = [
-        "달러인덱스\n     ",
-        str(last_value),
-        "/",
-        str(change),
-        mark,
-        "(",
-        str(change_rate),
-        "%",
-        ")",
-    ]
-    mesg = " ".join(mesg)
-    return mesg
+    return ["달러인덱스", last_value]
 
 
 def get_interest():
@@ -82,29 +42,7 @@ def get_interest():
     }
     data = requests.get(url, headers=headers).json()
     last_value = float(data["attr"]["last_value"])
-    last_close_value = float(data["attr"]["last_close_value"])
-    change = round(last_value - last_close_value, 3)
-    change_rate = round(change / last_close_value * 100, 2)
-    if change > 0:
-        mark = "↑"
-    elif change < 0:
-        mark = "↓"
-        change = -change
-    else:
-        mark = "-"
-    mesg = [
-        "미국채10년금리\n     ",
-        str(last_value),
-        "/",
-        str(change),
-        mark,
-        "(",
-        str(change_rate),
-        "%",
-        ")",
-    ]
-    mesg = " ".join(mesg)
-    return mesg
+    return ["미국채10년금리", last_value]
 
 
 def get_copper():
@@ -116,29 +54,7 @@ def get_copper():
     }
     data = requests.get(url, headers=headers).json()
     last_value = float(data["attr"]["last_value"])
-    last_close_value = float(data["attr"]["last_close_value"])
-    change = round(last_value - last_close_value, 3)
-    change_rate = round(change / last_close_value * 100, 2)
-    if change > 0:
-        mark = "↑"
-    elif change < 0:
-        mark = "↓"
-        change = -change
-    else:
-        mark = "-"
-    mesg = [
-        "구리원자재\n     ",
-        str(last_value),
-        "/",
-        str(change),
-        mark,
-        "(",
-        str(change_rate),
-        "%",
-        ")",
-    ]
-    mesg = " ".join(mesg)
-    return mesg
+    return ["구리원자재", last_value]
 
 
 def get_wti_oil():
@@ -150,28 +66,50 @@ def get_wti_oil():
     }
     data = requests.get(url, headers=headers).json()
     last_value = float(data["attr"]["last_value"])
-    last_close_value = float(data["attr"]["last_close_value"])
-    change = round(last_value - last_close_value, 3)
-    change_rate = round(change / last_close_value * 100, 2)
-    if change > 0:
-        mark = "↑"
-    elif change < 0:
-        mark = "↓"
-        change = -change
-    else:
-        mark = "-"
-    mesg = [
-        "WTI유가원자재\n     ",
-        str(last_value),
-        "/",
-        str(change),
-        mark,
-        "(",
-        str(change_rate),
-        "%",
-        ")",
-    ]
-    mesg = " ".join(mesg)
+    return ["WTI유가원자재", last_value]
+
+
+def get_message():
+    p_data = []
+    with open(c_path + "/last_info.txt", "r") as f:
+        for _ in range(5):
+            p_data.append(float(f.readline().strip()))
+    name = [""] * 5
+    c_data = [0] * 5
+    name[0], c_data[0] = get_exchange_rate()
+    name[1], c_data[1] = get_dollar_index()
+    name[2], c_data[2] = get_interest()
+    name[3], c_data[3] = get_copper()
+    name[4], c_data[4] = get_wti_oil()
+    with open(c_path + "/last_info.txt", "w") as f:
+        for value in c_data:
+            f.write(f"{value}\n")
+    mesg = ""
+    for i in range(len(name)):
+        change = round(c_data[i] - p_data[i], 3)
+        change_rate = round(change / p_data[i] * 100, 2)
+        if change > 0:
+            mark = "↑"
+        elif change < 0:
+            mark = "↓"
+            change = -change
+        else:
+            mark = "-"
+        tmp = [
+            str(name[i]),
+            "\n     ",
+            str(c_data[i]),
+            "/",
+            str(change),
+            mark,
+            "(",
+            str(change_rate),
+            "%",
+            ")",
+        ]
+        mesg += " ".join(tmp)
+        if i != len(name) - 1:
+            mesg += "\n"
     return mesg
 
 
@@ -181,15 +119,4 @@ if __name__ == "__main__":
     # print(get_interest())
     # print(get_copper())
     # print(get_wti_oil())
-    msg = (
-        get_exchange_rate()
-        + "\n"
-        + get_dollar_index()
-        + "\n"
-        + get_interest()
-        + "\n"
-        + get_copper()
-        + "\n"
-        + get_wti_oil()
-    )
-    print(msg)
+    print(get_message())

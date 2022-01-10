@@ -1,6 +1,5 @@
 import sys
 from PyQt5.QtWidgets import *
-from PyQt5.QAxContainer import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import datetime
@@ -25,9 +24,6 @@ class MyApp(QWidget):
 
         # timer
         self.t1 = self.now.replace(hour=20, minute=0, second=0, microsecond=0)
-        # self.t_test = self.now.replace(hour=3, minute=15, second=0, microsecond=0)
-        # self.t_start = self.t_now.replace(hour=9, minute=5, second=0, microsecond=0)
-        # self.t_sell = self.t_now.replace(hour=15, minute=15, second=0, microsecond=0)
 
         self.timer = QTimer(self)
         self.timer.start(1000)
@@ -63,17 +59,7 @@ class MyApp(QWidget):
                 to_slack(self.get_inform(), "#exchange-rate")
 
     def get_inform(self):
-        msg = (
-            get_exchange_rate()
-            + "\n"
-            + get_dollar_index()
-            + "\n"
-            + get_interest()
-            + "\n"
-            + get_copper()
-            + "\n"
-            + get_wti_oil()
-        )
+        msg = get_message()
         return msg
 
 
