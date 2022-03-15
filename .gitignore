@@ -1,4 +1,7 @@
 secrets.json
+last_info.txt
+*.csv
+*.xlsx
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode,python

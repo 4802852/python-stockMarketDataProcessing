@@ -71,7 +71,7 @@ def get_wti_oil():
 
 def get_message():
     p_data = []
-    with open(c_path + "/last_info.txt", "r") as f:
+    with open(c_path + "\last_info.txt", "r") as f:
         for _ in range(5):
             p_data.append(float(f.readline().strip()))
     name = [""] * 5
@@ -81,7 +81,7 @@ def get_message():
     name[2], c_data[2] = get_interest()
     name[3], c_data[3] = get_copper()
     name[4], c_data[4] = get_wti_oil()
-    with open(c_path + "/last_info.txt", "w") as f:
+    with open(c_path + "\last_info.txt", "w") as f:
         for value in c_data:
             f.write(f"{value}\n")
     mesg = ""
