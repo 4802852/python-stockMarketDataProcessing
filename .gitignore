@@ -1,5 +1,5 @@
 secrets.json
-last_info.txt
+*.txt
 *.csv
 *.xlsx
 

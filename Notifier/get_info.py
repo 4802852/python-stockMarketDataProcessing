@@ -1,93 +1,56 @@
 import requests
 import os
-from bs4 import BeautifulSoup as soup
 
 c_path = os.path.dirname(os.path.abspath(__file__))
 
-
-def get_exchange_rate():
-    url = "https://finance.naver.com/marketindex/"
-    res = requests.get(url)
-    html = soup(res.text, "html.parser")
-
-    nation = html.select("a.head > h3.h_lst")
-    value = html.select("div.head_info > span.value")
-
-    for i in range(len(nation)):
-        na = nation[i].string
-        va = value[i].string.replace(",", "")
-        if na == "미국 USD":
-            res = [na, float(va)]
-    return res
+data_list = {
+    "USD/KRW": ["USD/KRW", 650, "https://www.investing.com/currencies/usd-krw"],
+    "US10Y": ["US10Y", 23705, "https://www.investing.com/rates-bonds/u.s.-10-year-bond-yield"],
+    "US2Y": ["US2Y", 23701, "https://www.investing.com/rates-bonds/u.s.-2-year-bond-yield"],
+    "COPPER": ["COPPER", 8831, "https://www.investing.com/commodities/copper"],
+    "WTI OIL": ["WTI OIL", 8849, "https://www.investing.com/commodities/crude-oil"],
+    "$ Index": ["$ Index", 8827, "https://www.investing.com/currencies/us-dollar-index"],
+}
 
 
-def get_dollar_index():
-    url = "https://www.investing.com/common/modules/js_instrument_chart/api/data.php?pair_id=8827&pair_id_for_news=8827&chart_type=area&pair_interval=900&candle_count=120&events=yes&volume_series=yes"
+def get_data(data_name, pair_id, referer):
+    url = f"https://www.investing.com/common/modules/js_instrument_chart/api/data.php?pair_id={pair_id}&pair_id_for_news={pair_id}&chart_type=area&pair_interval=900&candle_count=120&events=yes&volume_series=yes"
     headers = {
         "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0",
         "X-Requested-With": "XMLHttpRequest",
-        "Referer": "https://www.investing.com/currencies/us-dollar-index",
+        "Referer": referer,
     }
     data = requests.get(url, headers=headers).json()
     last_value = float(data["attr"]["last_value"])
-    return ["달러인덱스", last_value]
-
-
-def get_interest():
-    url = "https://www.investing.com/common/modules/js_instrument_chart/api/data.php?pair_id=23705&pair_id_for_news=23705&chart_type=area&pair_interval=900&candle_count=120&events=yes&volume_series=yes"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0",
-        "X-Requested-With": "XMLHttpRequest",
-        "Referer": "https://www.investing.com/rates-bonds/u.s.-10-year-bond-yield",
-    }
-    data = requests.get(url, headers=headers).json()
-    last_value = float(data["attr"]["last_value"])
-    return ["미국채10년금리", last_value]
-
-
-def get_copper():
-    url = "https://www.investing.com/common/modules/js_instrument_chart/api/data.php?pair_id=8831&pair_id_for_news=8831&chart_type=area&pair_interval=900&candle_count=120&events=yes&volume_series=yes"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0",
-        "X-Requested-With": "XMLHttpRequest",
-        "Referer": "https://www.investing.com/commodities/copper",
-    }
-    data = requests.get(url, headers=headers).json()
-    last_value = float(data["attr"]["last_value"])
-    return ["구리원자재", last_value]
-
-
-def get_wti_oil():
-    url = "https://www.investing.com/common/modules/js_instrument_chart/api/data.php?pair_id=8849&pair_id_for_news=8849&chart_type=area&pair_interval=900&candle_count=120&events=yes&volume_series=yes"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0",
-        "X-Requested-With": "XMLHttpRequest",
-        "Referer": "https://www.investing.com/commodities/crude-oil",
-    }
-    data = requests.get(url, headers=headers).json()
-    last_value = float(data["attr"]["last_value"])
-    return ["WTI유가원자재", last_value]
+    return [data_name, last_value]
 
 
 def get_message():
-    p_data = []
-    with open(c_path + "\last_info.txt", "r") as f:
-        for _ in range(5):
-            p_data.append(float(f.readline().strip()))
-    name = [""] * 5
-    c_data = [0] * 5
-    name[0], c_data[0] = get_exchange_rate()
-    name[1], c_data[1] = get_dollar_index()
-    name[2], c_data[2] = get_interest()
-    name[3], c_data[3] = get_copper()
-    name[4], c_data[4] = get_wti_oil()
-    with open(c_path + "\last_info.txt", "w") as f:
-        for value in c_data:
-            f.write(f"{value}\n")
+    series = ["USD/KRW", "US10Y", "US10Y-2Y", "COPPER", "WTI OIL", "$ Index"]
+    data_result = {}
+    for na in data_list.keys():
+        n, id, ref = data_list[na]
+        nn, cd = get_data(n, id, ref)
+        data_result[nn] = {"c_data": cd}
+    data_result["US10Y-2Y"] = {
+        "c_data": round(data_result["US10Y"]["c_data"] - data_result["US2Y"]["c_data"], 3)
+    }
+    try:
+        with open(c_path + "\last_info.txt", "r") as f:
+            for text in f:
+                name, pd = map(str, text.strip().split())
+                data_result[name]["p_data"] = float(pd)
+    except:
+        pass
     mesg = ""
-    for i in range(len(name)):
-        change = round(c_data[i] - p_data[i], 3)
-        change_rate = round(change / p_data[i] * 100, 2)
+    for i, name in enumerate(series):
+        c_data = data_result[name]["c_data"]
+        try:
+            p_data = data_result[name]["p_data"]
+        except:
+            p_data = c_data
+        change = round(c_data - p_data, 3)
+        change_rate = round(change / p_data * 100, 2)
         if change > 0:
             mark = "↑"
         elif change < 0:
@@ -96,20 +59,27 @@ def get_message():
         else:
             mark = "-"
         tmp = [
-            str(name[i]),
+            str(name),
             "\n     ",
-            str(c_data[i]),
+            str(c_data),
             "/",
             str(change),
             mark,
-            "(",
-            str(change_rate),
-            "%",
-            ")",
         ]
+        if name != "US10Y-2Y":
+            tmp += [
+                "(",
+                str(change_rate),
+                "%",
+                ")",
+            ]
         mesg += " ".join(tmp)
         if i != len(name) - 1:
             mesg += "\n"
+    with open(c_path + "\last_info.txt", "w") as f:
+        for name in data_list.keys():
+            value = data_result[name]["c_data"]
+            f.write(f"{name} {value}\n")
     return mesg
 
 
