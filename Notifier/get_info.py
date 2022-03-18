@@ -8,8 +8,8 @@ data_list = {
     "US10Y": ["US10Y", 23705, "https://www.investing.com/rates-bonds/u.s.-10-year-bond-yield"],
     "US2Y": ["US2Y", 23701, "https://www.investing.com/rates-bonds/u.s.-2-year-bond-yield"],
     "COPPER": ["COPPER", 8831, "https://www.investing.com/commodities/copper"],
-    "WTI OIL": ["WTI OIL", 8849, "https://www.investing.com/commodities/crude-oil"],
-    "$ Index": ["$ Index", 8827, "https://www.investing.com/currencies/us-dollar-index"],
+    "WTI_OIL": ["WTI_OIL", 8849, "https://www.investing.com/commodities/crude-oil"],
+    "$_Index": ["$_Index", 8827, "https://www.investing.com/currencies/us-dollar-index"],
 }
 
 
@@ -26,7 +26,7 @@ def get_data(data_name, pair_id, referer):
 
 
 def get_message():
-    series = ["USD/KRW", "US10Y", "US10Y-2Y", "COPPER", "WTI OIL", "$ Index"]
+    series = ["USD/KRW", "US10Y", "US10Y-2Y", "COPPER", "WTI_OIL", "$_Index"]
     data_result = {}
     for na in data_list.keys():
         n, id, ref = data_list[na]
@@ -38,8 +38,11 @@ def get_message():
     try:
         with open(c_path + "\last_info.txt", "r") as f:
             for text in f:
-                name, pd = map(str, text.strip().split())
+                name, pd = map(str, text.split())
                 data_result[name]["p_data"] = float(pd)
+        data_result["US10Y-2Y"]["p_data"] = round(
+            data_result["US10Y"]["p_data"] - data_result["US2Y"]["p_data"], 3
+        )
     except:
         pass
     mesg = ""
